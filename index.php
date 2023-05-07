@@ -347,11 +347,8 @@ else {
       session_start() && !empty($_SESSION['login'])) {
         $id=$_SESSION['uid'];
         $upd=$db->prepare("INSERT INTO app SET name = ?, email = ?, year = ?, sex = ?, limbs = ?, biography = ? WHERE id =:id ");
-        $stmt -> execute([$_POST['fio'], $_POST['email'], $_POST['year'], $_POST['sex'],$_POST['limbs'], $_POST['biography']]);
+        $upd -> execute([$_POST['fio'], $_POST['email'], $_POST['year'], $_POST['sex'],$_POST['limbs'], $_POST['biography']]);
 
-        foreach($cols as $k=>&$v){
-          $upd->bindParam($k,$v);
-        }
         $upd->bindParam(':id',$id);
         $upd->execute();
         $del=$db->prepare("DELETE FROM app_abil WHERE aplication_id=?");
