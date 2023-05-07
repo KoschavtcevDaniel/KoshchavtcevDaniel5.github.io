@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
   $values['ab_l'] = empty($_COOKIE['ab_l_value']) ? 0 : strip_tags($_COOKIE['ab_l_value']);
   $values['ab_v'] = empty($_COOKIE['ab_v_value']) ? 0 : strip_tags($_COOKIE['ab_v_value']);
   $values['biography'] = empty($_COOKIE['biography_value']) ? '' : strip_tags($_COOKIE['biography_value']);
-  $values['check1'] = empty($_COOKIE['check_value']) ? 0 : strip_tags($_COOKIE['check_value']);
+  $values['check1'] = empty($_COOKIE['check_value']) ? FALSE : strip_tags($_COOKIE['check_value']);
 
 
   if (!$errors && !empty($_COOKIE[session_name()]) &&
@@ -131,28 +131,28 @@ try {
   $get->bindParam(1,$_SESSION['uid']);
   $get->execute();
   $info=$get->fetchALL();
-  $values['fio']=$inf[0]['fio'];
-  $values['email']=$inf[0]['email'];
-  $values['year']=$inf[0]['year'];
-  $values['sex']=$inf[0]['sex'];
-  $values['limbs']=$inf[0]['limbs'];
-  $values['biography']=$inf[0]['biography'];
+  $values['fio']=$info[0]['name'];
+  $values['email']=$info[0]['email'];
+  $values['year']=$info[0]['year'];
+  $values['sex']=$info[0]['sex'];
+  $values['limbs']=$info[0]['limbs'];
+  $values['biography']=$info[0]['biography'];
 
   $get2=$db->prepare("SELECT ability FROM app_abil WHERE application_id=?");
   $get2->bindParam(1,$_SESSION['uid']);
   $get2->execute();
-  $inf2=$get2->fetchALL();
-  for($i=0;$i<count($inf2);$i++){
-    if($inf2[$i]['ability']=='ab_in'){
+  $info2=$get2->fetchALL();
+  for($i=0;$i<count($info2);$i++){
+    if($info2[$i]['ability']=='ab_in'){
       $values['ab_in']=1;
     }
-    if($inf2[$i]['ability']=='ab_t'){
+    if($info2[$i]['ability']=='ab_t'){
       $values['ab_t']=1;
     }
-    if($inf2[$i]['ability']=='ab_l'){
+    if($info2[$i]['ability']=='ab_l'){
       $values['ab_l']=1;
     }
-    if($inf2[$i]['ability']=='ab_v'){
+    if($info2[$i]['ability']=='ab_v'){
       $values['ab_v']=1;
     }
   }
@@ -187,7 +187,7 @@ else {
     $ability=$_POST['abilities'];
     $biography=$_POST['biography'];
     if(empty($_SESSION['login'])){
-      $check=$_POST['check1'];
+      $check=$_POST['check'];
     }
 
   $bioregex = "/^\s*\w+[\w\s\.,-]*$/";
@@ -297,15 +297,6 @@ else {
     setcookie('biography_value', $_POST['biography'], time() + 12 * 30 * 24 * 60 * 60);
     setcookie('biography_error', '', 100000);
   }
-  if(!isset($_POST['check1'])){
-    setcookie('check_error','1',time()+  24 * 60 * 60);
-    setcookie('check_value', '', 100000);
-    $errors=TRUE;
-  }
-  else{
-    setcookie('check_value', TRUE,time()+ 12 * 30 * 24 * 60 * 60);
-    setcookie('check_error','',100000);
-  }
   if(empty($_SESSION['login'])){
     if(!isset($check)){
       setcookie('check_error','1',time()+ 24*60*60);
@@ -346,9 +337,18 @@ else {
   if (!empty($_COOKIE[session_name()]) &&
       session_start() && !empty($_SESSION['login'])) {
         $id=$_SESSION['uid'];
-        $upd=$db->prepare("INSERT INTO app SET name = ?, email = ?, year = ?, sex = ?, limbs = ?, biography = ? WHERE id =:id ");
-        $upd -> execute([$_POST['fio'], $_POST['email'], $_POST['year'], $_POST['sex'],$_POST['limbs'], $_POST['biography']]);
-
+        $upd=$db->prepare("UPDATE app SET name=:name, email=:email, year=:year, sex=:sex, limbs=:limbs, biography=:biography WHERE id=:id");
+        $cols=array(
+          ':name'=>$name,
+          ':email'=>$email,
+          ':byear'=>$year,
+          ':sex'=>$sex,
+          ':limbs'=>$limbs,
+          ':biography'=>$biography
+        );
+        foreach($cols as $ind=>&$val){
+          $upd->bindParam($ind,$val);
+        }
         $upd->bindParam(':id',$id);
         $upd->execute();
         $del=$db->prepare("DELETE FROM app_abil WHERE aplication_id=?");
