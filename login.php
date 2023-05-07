@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
   }else{
 ?>
 
-<div class="log-in">
+<div class="login">
 <form action="login.php" method="post">
   <input name="login" /> Логин<br>
   <input name="password" type="password"/> Пароль<br>
