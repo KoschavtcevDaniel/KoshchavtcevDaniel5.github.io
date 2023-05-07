@@ -73,7 +73,7 @@ if (!empty($messages)) {
   </div>
 
   <?php 
-      $lc='';
+       $lc='';
        $ch='';
      if($values['check1'] or !empty($_SESSION['login'])){
       $ch='checked';
@@ -84,13 +84,13 @@ if (!empty($messages)) {
       if(empty($_SESSION['login'])){
        print('
            <div  '.$lc.' >
-            <input name="check1" type="checkbox" '.$ch.'> Я согласен дать данные <br>
+            <input name="check" type="checkbox" '.$ch.'> Я согласен дать данные <br>
             </div>');}
      ?>
 
                 
      <input type="submit" value="Отправить" />
-  </form>
+
     <?php
       if(empty($_SESSION['login'])){
          echo'
@@ -107,7 +107,7 @@ if (!empty($messages)) {
             </div>';
          } ?>
 
-       
+</form>
   </div>
   </body>
 </html>
